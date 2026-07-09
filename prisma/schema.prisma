@@ -2,7 +2,6 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -86,11 +85,31 @@ model User {
   employee     Employee?
   bookings     Booking[]     @relation("CustomerBookings")
   reviews      Review[]      @relation("CustomerReviews")
+  invitationsCreated Invitation[] @relation("InvitationCreator")
+  invitationsUsed Invitation[] @relation("InvitationUser")
   auditLogs    AuditLog[]
   notifications Notification[]
 
   @@index([email])
   @@index([role])
+}
+
+model Invitation {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  targetEmail String?
+  role        Role     @default(SALON_OWNER)
+  isUsed      Boolean  @default(false)
+  createdById String?
+  createdBy   User?    @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  usedById    String?
+  usedBy      User?    @relation("InvitationUser", fields: [usedById], references: [id], onDelete: SetNull)
+  usedAt      DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
 }
 
 model Profile {
@@ -267,6 +286,7 @@ model Booking {
 
   // Relations
   review          Review?
+  paymentTransaction PaymentTransaction?
 
   @@index([customerId])
   @@index([salonId])
@@ -345,7 +365,7 @@ model AuditLog {
 
 model PaymentTransaction {
   id             String      @id @default(uuid())
-  bookingId      String
+  bookingId      String      @unique
   booking        Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   provider       String
   providerTxId   String      @unique

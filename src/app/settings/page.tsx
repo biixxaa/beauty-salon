@@ -19,6 +19,7 @@ function SettingsPageContent() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [referredByCode, setReferredByCode] = useState('');
+  const [invitationCode, setInvitationCode] = useState('');
 
   // Error/Success state
   const [error, setError] = useState('');
@@ -71,7 +72,8 @@ function SettingsPageContent() {
             name,
             phone,
             role,
-            referredByCode: referredByCode || undefined,
+            invitationCode: role === 'SALON_OWNER' ? invitationCode : undefined,
+            referralCodeUsed: referredByCode || undefined,
           }),
         });
 
@@ -266,6 +268,30 @@ function SettingsPageContent() {
               />
             </div>
           </div>
+
+          {/* Salon Owner Invitation Code (only on register) */}
+          {mode === 'register' && role === 'SALON_OWNER' && (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase">Invitation Code</label>
+                <span className="text-[9px] text-amber-500 font-bold flex items-center gap-0.5">
+                  Required for salon owners
+                </span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-2.5 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-55 dark:bg-zinc-950">
+                <Gift className="h-4 w-4 text-zinc-450 shrink-0" />
+                <input
+                  type="text"
+                  required
+                  value={invitationCode}
+                  onChange={(e) => setInvitationCode(e.target.value)}
+                  placeholder="Enter your invitation code"
+                  className="w-full bg-transparent border-none text-xs focus:outline-none focus:ring-0 text-zinc-850 dark:text-zinc-150 uppercase"
+                />
+              </div>
+              <p className="text-[10px] text-zinc-500">Salon owner accounts can only be created with a valid invitation code sent by an administrator.</p>
+            </div>
+          )}
 
           {/* Referral Code (only on register) */}
           {mode === 'register' && (

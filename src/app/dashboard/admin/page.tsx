@@ -3,13 +3,20 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Compass, Star, ShieldCheck, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react';
+import { Compass, Star, ShieldCheck, ShieldAlert, Sparkles, RefreshCw, Mail } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [salons, setSalons] = useState<any[]>([]);
+  const [invites, setInvites] = useState<any[]>([]);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('SALON_OWNER');
+  const [inviteExpiresInDays, setInviteExpiresInDays] = useState('7');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteError, setInviteError] = useState('');
   const [loading, setLoading] = useState(true);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
@@ -28,6 +35,12 @@ export default function AdminDashboard() {
       const salonsData = await salonsRes.json();
       if (Array.isArray(salonsData)) {
         setSalons(salonsData);
+      }
+
+      const invitesRes = await fetch('/api/dashboard/invitations');
+      const invitesData = await invitesRes.json();
+      if (Array.isArray(invitesData)) {
+        setInvites(invitesData);
       }
     } catch (err) {
       console.error(err);
@@ -69,6 +82,41 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCreateInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteError('');
+    setInviteMessage('');
+    setInviteLoading(true);
+
+    try {
+      const res = await fetch('/api/dashboard/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetEmail: inviteEmail || undefined,
+          role: inviteRole,
+          expiresInDays: Number(inviteExpiresInDays) || undefined,
+        }),
+      });
+
+      const payload = await res.json();
+      if (!res.ok) {
+        setInviteError(payload.error || 'Could not create invitation');
+        return;
+      }
+
+      setInviteMessage(`Created invitation code ${payload.invitation.code}`);
+      setInviteEmail('');
+      setInviteExpiresInDays('7');
+      setInvites((prev) => [payload.invitation, ...prev]);
+    } catch (err) {
+      console.error(err);
+      setInviteError('Failed to create invitation');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-12 gap-3">
@@ -103,6 +151,96 @@ export default function AdminDashboard() {
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 p-5 rounded-2xl flex flex-col gap-1">
           <span className="text-xs text-zinc-450 uppercase font-bold tracking-wider">Verified Partners</span>
           <span className="text-2xl font-extrabold text-emerald-500">{verifiedSalons.length}</span>
+        </div>
+      </div>
+
+      {/* Invitation management */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 rounded-3xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Mail className="h-5 w-5 text-amber-500" />
+            <div>
+              <h2 className="text-sm font-extrabold text-zinc-900 dark:text-zinc-100">Create an Invitation</h2>
+              <p className="text-xs text-zinc-500">Generate a salon owner invite code and share it only with trusted partners.</p>
+            </div>
+          </div>
+
+          {inviteError ? (
+            <div className="mb-3 p-3 rounded-2xl bg-red-500/10 text-red-600 text-xs font-bold">{inviteError}</div>
+          ) : null}
+          {inviteMessage ? (
+            <div className="mb-3 p-3 rounded-2xl bg-emerald-500/10 text-emerald-700 text-xs font-bold">{inviteMessage}</div>
+          ) : null}
+
+          <form onSubmit={handleCreateInvite} className="flex flex-col gap-3">
+            <label className="text-[10px] font-bold uppercase text-zinc-400">Invite Email (optional)</label>
+            <input
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="e.g. owner@example.com"
+              className="w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-55 dark:bg-zinc-950 px-4 py-3 text-xs text-zinc-900 dark:text-zinc-100"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase text-zinc-400">Role</label>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-55 dark:bg-zinc-950 px-4 py-3 text-xs text-zinc-900 dark:text-zinc-100"
+                >
+                  <option value="SALON_OWNER">Salon Owner</option>
+                  <option value="EMPLOYEE">Employee</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase text-zinc-400">Expires in (days)</label>
+                <input
+                  type="number"
+                  value={inviteExpiresInDays}
+                  min="1"
+                  onChange={(e) => setInviteExpiresInDays(e.target.value)}
+                  className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-55 dark:bg-zinc-950 px-4 py-3 text-xs text-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={inviteLoading}
+              className="w-full rounded-2xl bg-amber-500 px-4 py-3 text-xs font-bold text-white transition hover:bg-amber-600 disabled:opacity-60"
+            >
+              {inviteLoading ? 'Generating...' : 'Create Invitation'}
+            </button>
+          </form>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 rounded-3xl p-6">
+          <h2 className="text-sm font-extrabold text-zinc-900 dark:text-zinc-100 mb-4">Recent Invitations</h2>
+          {invites.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 p-6 text-center text-xs text-zinc-500">
+              No invitations have been created yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {invites.slice(0, 6).map((invite) => (
+                <div key={invite.id} className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 text-xs bg-zinc-50 dark:bg-zinc-950">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-bold text-zinc-900 dark:text-zinc-100">{invite.code}</div>
+                      <div className="text-zinc-500 dark:text-zinc-400">Role: {invite.role}</div>
+                    </div>
+                    <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${invite.isUsed ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                      {invite.isUsed ? 'Used' : 'Unused'}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-zinc-500 dark:text-zinc-400">
+                    {invite.targetEmail ? `Email: ${invite.targetEmail}` : 'Email: any'} • Expires: {invite.expiresAt ? new Date(invite.expiresAt).toLocaleDateString() : 'No expiry'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
