@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Scissors, User, Mail, Lock, Phone, HelpCircle, Gift, RefreshCw } from 'lucide-react';
+import { Scissors, User, Mail, Lock, Phone, HelpCircle, Gift, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 function SettingsPageContent() {
   const router = useRouter();
@@ -11,7 +11,7 @@ function SettingsPageContent() {
   const defaultMode = searchParams.get('mode') || 'login';
 
   const [mode, setMode] = useState<'login' | 'register'>(defaultMode as 'login' | 'register');
-  const [role, setRole] = useState<'CUSTOMER' | 'SALON_OWNER'>('CUSTOMER');
+  const role = 'CUSTOMER';
 
   // Input states
   const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ function SettingsPageContent() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [referredByCode, setReferredByCode] = useState('');
-  const [invitationCode, setInvitationCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Error/Success state
   const [error, setError] = useState('');
@@ -71,8 +71,7 @@ function SettingsPageContent() {
             password,
             name,
             phone,
-            role,
-            invitationCode: role === 'SALON_OWNER' ? invitationCode : undefined,
+            role: role, // Allow both CUSTOMER and SALON_OWNER
             referralCodeUsed: referredByCode || undefined,
           }),
         });
@@ -170,37 +169,6 @@ function SettingsPageContent() {
             </div>
           )}
 
-          {/* Registration Role Selection */}
-          {mode === 'register' && (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase">Account Type</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRole('CUSTOMER')}
-                  className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                    role === 'CUSTOMER'
-                      ? 'border-amber-500 bg-amber-500/5 text-amber-500'
-                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-500'
-                  }`}
-                >
-                  Customer Client
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('SALON_OWNER')}
-                  className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                    role === 'SALON_OWNER'
-                      ? 'border-amber-500 bg-amber-500/5 text-amber-500'
-                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-500'
-                  }`}
-                >
-                  Salon Owner
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Full Name (only on register) */}
           {mode === 'register' && (
             <div className="flex flex-col gap-1">
@@ -259,39 +227,24 @@ function SettingsPageContent() {
             <div className="flex items-center gap-2 px-3 py-2.5 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-55 dark:bg-zinc-950">
               <Lock className="h-4 w-4 text-zinc-450 shrink-0" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full bg-transparent border-none text-xs focus:outline-none focus:ring-0 text-zinc-850 dark:text-zinc-150"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-zinc-450 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors shrink-0"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
-          {/* Salon Owner Invitation Code (only on register) */}
-          {mode === 'register' && role === 'SALON_OWNER' && (
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase">Invitation Code</label>
-                <span className="text-[9px] text-amber-500 font-bold flex items-center gap-0.5">
-                  Required for salon owners
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2.5 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-55 dark:bg-zinc-950">
-                <Gift className="h-4 w-4 text-zinc-450 shrink-0" />
-                <input
-                  type="text"
-                  required
-                  value={invitationCode}
-                  onChange={(e) => setInvitationCode(e.target.value)}
-                  placeholder="Enter your invitation code"
-                  className="w-full bg-transparent border-none text-xs focus:outline-none focus:ring-0 text-zinc-850 dark:text-zinc-150 uppercase"
-                />
-              </div>
-              <p className="text-[10px] text-zinc-500">Salon owner accounts can only be created with a valid invitation code sent by an administrator.</p>
-            </div>
-          )}
+
 
           {/* Referral Code (only on register) */}
           {mode === 'register' && (

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
 
     // Simulate payment success for supported methods
-    let status = PaymentStatus.PENDING;
+    let status: PaymentStatus = PaymentStatus.PENDING;
     if (method === PaymentMethod.TELEBIRR || method === PaymentMethod.CBE_BIRR || method === PaymentMethod.CARD) {
       status = PaymentStatus.PAID;
     }

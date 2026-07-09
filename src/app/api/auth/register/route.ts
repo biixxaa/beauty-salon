@@ -6,15 +6,14 @@ import { hashPassword } from '@/lib/auth';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, name, phone, role, referralCodeUsed, invitationCode } = body;
+    const { email, password, name, phone, referralCodeUsed, role: requestedRole } = body;
 
     if (!email || !password || !name) {
       return NextResponse.json({ error: 'Email, password, and name are required' }, { status: 400 });
     }
 
-    if (role === 'SALON_OWNER' && !invitationCode) {
-      return NextResponse.json({ error: 'Invitation code is required for salon owner registration' }, { status: 400 });
-    }
+    // Public self-registration only allows CUSTOMER role
+    const role = 'CUSTOMER';
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
@@ -43,36 +42,13 @@ export async function POST(request: Request) {
         });
       }
 
-      let invitation = null;
-      if (role === 'SALON_OWNER') {
-        invitation = await tx.invitation.findUnique({
-          where: { code: invitationCode },
-        });
-
-        if (!invitation || invitation.role !== 'SALON_OWNER') {
-          throw new Error('Invalid salon owner invitation code');
-        }
-
-        if (invitation.isUsed) {
-          throw new Error('This invitation code has already been used');
-        }
-
-        if (invitation.expiresAt && invitation.expiresAt < new Date()) {
-          throw new Error('This invitation code has expired');
-        }
-
-        if (invitation.targetEmail && invitation.targetEmail.toLowerCase() !== email.toLowerCase()) {
-          throw new Error('This invitation code is restricted to a different email');
-        }
-      }
-
       const user = await tx.user.create({
         data: {
           email,
           passwordHash,
           name,
           phone,
-          role: role || 'CUSTOMER',
+          role,
         },
       });
 
@@ -85,17 +61,6 @@ export async function POST(request: Request) {
           walletBalance: 0.00,
         },
       });
-
-      if (invitation) {
-        await tx.invitation.update({
-          where: { id: invitation.id },
-          data: {
-            isUsed: true,
-            usedById: user.id,
-            usedAt: new Date(),
-          },
-        });
-      }
 
       // If referred, award points to the referrer
       if (referrerProfile) {

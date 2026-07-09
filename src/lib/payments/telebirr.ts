@@ -37,7 +37,7 @@ export class TelebirrService {
         bookingId,
         notifyUrl: process.env.TELEBIRR_NOTIFY_URL || `${process.env.BASE_URL || ''}/api/payments/webhooks/telebirr`,
         returnUrl: process.env.TELEBIRR_RETURN_URL || `${process.env.BASE_URL || ''}/checkout/return`,
-      } as PaymentRequest;
+      } as any;
 
       const body = JSON.stringify(payload);
 

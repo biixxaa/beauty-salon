@@ -8,6 +8,7 @@ export async function sendEmail({ to, subject, html, text }: { to: string; subje
   // If SMTP is configured, attempt to send via nodemailer if installed
   try {
     // Dynamically import to avoid adding dependency unless configured
+    // @ts-ignore
     const nodemailer = await import('nodemailer');
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,

@@ -73,14 +73,32 @@ function SearchPageContent() {
     fetchSalons();
   };
 
-  // Mock GPS coordinates (centered around Edna Mall, Bole, Addis Ababa)
+  // Request actual GPS coordinates with a fallback to Bole, Addis Ababa
   const triggerGps = () => {
     setGpsLoading(true);
-    setTimeout(() => {
-      setLatitude(9.0010); // Bole coordinates
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser. Using fallback coordinates.');
+      setLatitude(9.0010);
       setLongitude(38.7830);
       setGpsLoading(false);
-    }, 1200);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+        setGpsLoading(false);
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        alert(`Failed to get location: ${error.message}. Falling back to Bole, Addis Ababa.`);
+        setLatitude(9.0010);
+        setLongitude(38.7830);
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
   };
 
   const clearGps = () => {
