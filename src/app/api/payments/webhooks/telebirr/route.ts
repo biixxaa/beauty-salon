@@ -16,8 +16,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: 'Signature verification failed' }, { status: 400 });
     }
 
-    const body = JSON.parse(rawBody);
-    const { bookingId, outTradeNo } = body as any;
+    const body = JSON.parse(rawBody) as Record<string, unknown>;
+    const bookingId = typeof body.bookingId === 'string' ? body.bookingId : undefined;
+    const outTradeNo = typeof body.outTradeNo === 'string' ? body.outTradeNo : undefined;
 
     const verified = telebirr.verifyCallback(rawBody);
     if (!verified) {
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
       data: {
         paymentStatus: 'PAID',
         paymentMethod: 'TELEBIRR',
-        paymentDetails: { ...(booking.paymentDetails as any) || {}, ...body, providerTxId },
+        paymentDetails: { ...((booking.paymentDetails as Record<string, unknown>) || {}), ...body, providerTxId },
         status: 'CONFIRMED',
       },
     });
@@ -84,9 +85,11 @@ export async function POST(request: Request) {
         if (booking.customer?.email) {
           await sendEmail({ to: booking.customer.email, subject: 'Payment received', text: `We received payment for your booking ${booking.id}.` });
         }
-        if ((booking as any).paymentDetails?.customerPhone || booking.customer?.phone) {
-          const to = (booking as any).paymentDetails?.customerPhone || booking.customer?.phone;
-          await sendSms({ to, message: `Payment received for booking ${booking.id}. See your app for details.` });
+        {
+          const paymentDetails = (booking.paymentDetails as Record<string, unknown> | undefined) ?? {};
+          const phoneFromDetails = typeof (paymentDetails as Record<string, unknown>)['customerPhone'] === 'string' ? (paymentDetails as Record<string, unknown>)['customerPhone'] as string : undefined;
+          const to = phoneFromDetails || booking.customer?.phone;
+          if (to) await sendSms({ to, message: `Payment received for booking ${booking.id}. See your app for details.` });
         }
       } catch (e) {
         console.warn('Notification send failed', e);
@@ -98,17 +101,20 @@ export async function POST(request: Request) {
       if (booking.customer?.email) {
         await sendEmail({ to: booking.customer.email, subject: 'Payment received', text: `We received payment for your booking ${booking.id}.` });
       }
-      if ((booking as any).paymentDetails?.customerPhone || booking.customer?.phone) {
-        const to = (booking as any).paymentDetails?.customerPhone || booking.customer?.phone;
-        await sendSms({ to, message: `Payment received for booking ${booking.id}. See your app for details.` });
+      {
+        const paymentDetails = (booking.paymentDetails as Record<string, unknown> | undefined) ?? {};
+        const phoneFromDetails = typeof (paymentDetails as Record<string, unknown>)['customerPhone'] === 'string' ? (paymentDetails as Record<string, unknown>)['customerPhone'] as string : undefined;
+        const to = phoneFromDetails || booking.customer?.phone;
+        if (to) await sendSms({ to, message: `Payment received for booking ${booking.id}. See your app for details.` });
       }
     } catch (e) {
       console.warn('Notification send failed', e);
     }
 
     return NextResponse.json({ ok: true, booking: updated });
-  } catch (error: any) {
-    console.error('Telebirr webhook error:', error);
-    return NextResponse.json({ ok: false, error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Telebirr webhook error:', msg);
+    return NextResponse.json({ ok: false, error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

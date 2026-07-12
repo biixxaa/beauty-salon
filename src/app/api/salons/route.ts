@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { SalonCategory } from '@prisma/client';
+import { SalonCategory, Prisma } from '@prisma/client';
 
 function deg2rad(deg: number) {
   return deg * (Math.PI / 180);
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const radiusStr = searchParams.get('radius'); // in km, default 10km
     const featuredOnly = searchParams.get('featured') === 'true';
 
-    const whereClause: any = {};
+    const whereClause: Prisma.SalonWhereInput = {};
 
     if (category && category.toUpperCase() !== 'ALL') {
       whereClause.category = category.toUpperCase() as SalonCategory;
@@ -80,9 +80,10 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(salons);
-  } catch (error: any) {
-    console.error('List Salons API Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('List Salons API Error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -127,8 +128,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ message: 'Salon registered successfully', salon }, { status: 201 });
-  } catch (error: any) {
-    console.error('Create Salon API Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Create Salon API Error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

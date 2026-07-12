@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role') || user.role;
 
-    let bookings: any[] = [];
+    let bookings: unknown[] = [];
 
     if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
       bookings = await prisma.booking.findMany({
@@ -75,9 +75,10 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(bookings);
-  } catch (error: any) {
-    console.error('Fetch Bookings API Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Fetch Bookings API Error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }
 
