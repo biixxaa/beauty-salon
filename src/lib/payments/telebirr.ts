@@ -37,7 +37,7 @@ export class TelebirrService {
         bookingId,
         notifyUrl: process.env.TELEBIRR_NOTIFY_URL || `${process.env.BASE_URL || ''}/api/payments/webhooks/telebirr`,
         returnUrl: process.env.TELEBIRR_RETURN_URL || `${process.env.BASE_URL || ''}/checkout/return`,
-      } as any;
+      };
 
       const body = JSON.stringify(payload);
 
@@ -53,8 +53,9 @@ export class TelebirrService {
           h.update(body, 'utf8');
           signatureHeader = `sha256=${h.digest('hex')}`;
         }
-      } catch (e) {
-        console.warn('Telebirr signing failed', e);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn('Telebirr signing failed', msg);
       }
 
       try {
@@ -76,8 +77,9 @@ export class TelebirrService {
         // Fallback to local checkout gateway with returnedOutTradeNo
         const qp = new URLSearchParams({ bookingId, amount: amount.toString(), outTradeNo: returnedOutTradeNo, provider: 'telebirr' });
         return `/checkout/payment-gateway?${qp.toString()}`;
-      } catch (e) {
-        console.error('Telebirr API call failed', e);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error('Telebirr API call failed', msg);
         const fallback = new URLSearchParams({ bookingId, amount: amount.toString(), outTradeNo: `TB-${bookingId}-${Date.now()}` , provider: 'telebirr' });
         return `/checkout/payment-gateway?${fallback.toString()}`;
       }
@@ -121,8 +123,9 @@ export class CbeBirrService {
           h.update(body, 'utf8');
           signatureHeader = `sha256=${h.digest('hex')}`;
         }
-      } catch (e) {
-        console.warn('CBE signing failed', e);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn('CBE signing failed', msg);
       }
 
       try {
@@ -141,8 +144,9 @@ export class CbeBirrService {
         if (paymentUrl) return paymentUrl;
         const qp = new URLSearchParams({ bookingId, amount: amount.toString(), outTradeNo: returnedOutTradeNo, provider: 'cbe_birr' });
         return `/checkout/payment-gateway?${qp.toString()}`;
-      } catch (e) {
-        console.error('CBE API call failed', e);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error('CBE API call failed', msg);
         const fallback = new URLSearchParams({ bookingId, amount: amount.toString(), outTradeNo: `CBE-${bookingId}-${Date.now()}` , provider: 'cbe_birr' });
         return `/checkout/payment-gateway?${fallback.toString()}`;
       }
@@ -169,8 +173,9 @@ export function verifyWebhookSignature(secret: string | undefined, rawBody: stri
     const b = Buffer.from(sig, 'hex');
     if (a.length !== b.length) return false;
     return crypto.timingSafeEqual(a, b);
-  } catch (e) {
-    console.error('Signature verification error', e);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('Signature verification error', msg);
     return false;
   }
 }
