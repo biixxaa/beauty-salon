@@ -27,8 +27,10 @@ function SettingsPageContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Avoid synchronous setState in effect by deferring update
     if (defaultMode === 'login' || defaultMode === 'register') {
-      setMode(defaultMode);
+      const id = setTimeout(() => setMode(defaultMode as 'login' | 'register'), 0);
+      return () => clearTimeout(id);
     }
   }, [defaultMode]);
 

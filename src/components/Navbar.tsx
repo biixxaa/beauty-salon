@@ -32,23 +32,29 @@ export default function Navbar({ onOpenConsultant }: NavbarProps) {
   };
 
   useEffect(() => {
-    fetchUser();
+    // call fetchUser asynchronously to avoid synchronous setState inside effect
+    const id = setTimeout(() => { void fetchUser(); }, 0);
     // Watch for login events
     window.addEventListener('auth-change', fetchUser);
-    return () => window.removeEventListener('auth-change', fetchUser);
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener('auth-change', fetchUser);
+    };
   }, []);
 
   // Theme check
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark') || 
-                   localStorage.getItem('theme') === 'dark' ||
-                   (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    setDarkMode(isDark);
+    const isDark = document.documentElement.classList.contains('dark') ||
+      localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    // Defer state update to avoid synchronous setState within effect
+    const t = setTimeout(() => setDarkMode(isDark), 0);
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    return () => clearTimeout(t);
   }, []);
 
   const toggleTheme = () => {

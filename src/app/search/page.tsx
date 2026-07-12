@@ -65,7 +65,9 @@ function SearchPageContent() {
   };
 
   useEffect(() => {
-    fetchSalons();
+    // defer fetch to avoid synchronous setState in effect
+    const id = setTimeout(() => { void fetchSalons(); }, 0);
+  return () => clearTimeout(id);
   }, [category, rating, radius, latitude, longitude]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
