@@ -35,7 +35,8 @@ export default function EmployeeDashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    const id = setTimeout(() => { void fetchDashboardData(); }, 0);
+    return () => clearTimeout(id);
   }, []);
 
   const handleUpdateStatus = async (id: string, status: 'COMPLETED' | 'NO_SHOW') => {

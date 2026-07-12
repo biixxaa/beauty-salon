@@ -56,7 +56,8 @@ export default function SalonOwnerDashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    const id = setTimeout(() => { void fetchDashboardData(); }, 0);
+    return () => clearTimeout(id);
   }, []);
 
   const handleUpdateStatus = async (id: string, status: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED') => {

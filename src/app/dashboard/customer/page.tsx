@@ -43,7 +43,8 @@ export default function CustomerDashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    const id = setTimeout(() => { void fetchDashboardData(); }, 0);
+    return () => clearTimeout(id);
   }, []);
 
   const handleCancelBooking = async (id: string) => {
