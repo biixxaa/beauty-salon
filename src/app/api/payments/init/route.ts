@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 type Provider = 'TELEBIRR' | 'CBE_BIRR' | 'CARD';
 
-function signPayload(secret: string | undefined, payload: any) {
+function signPayload(secret: string | undefined, payload: unknown) {
   if (!secret) return null;
   try {
     const hmac = crypto.createHmac('sha256', secret);
@@ -19,8 +19,10 @@ function signPayload(secret: string | undefined, payload: any) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { bookingId, provider, returnUrl } = body as { bookingId: string; provider: Provider; returnUrl?: string };
+    const body = await request.json() as Record<string, unknown>;
+    const bookingId = typeof body.bookingId === 'string' ? body.bookingId : undefined;
+    const provider = (typeof body.provider === 'string' ? (body.provider as Provider) : undefined) as Provider | undefined;
+    const returnUrl = typeof body.returnUrl === 'string' ? body.returnUrl : undefined;
 
     if (!bookingId || !provider) {
       return NextResponse.json({ error: 'bookingId and provider are required' }, { status: 400 });
@@ -64,7 +66,7 @@ export async function POST(request: Request) {
 
     const providerTxId = outTradeNo || `${provider}-${booking.id}-${timestamp}`;
     const initiatedAt = new Date().toISOString();
-    const paymentDetails = { ...(booking.paymentDetails as any) || {}, initiatedAt, provider, providerTxId, outTradeNo, signature, returnUrl, status: 'INITIATED' };
+    const paymentDetails = { ...((booking.paymentDetails as Record<string, unknown>) || {}), initiatedAt, provider, providerTxId, outTradeNo, signature, returnUrl, status: 'INITIATED' };
 
     await prisma.$transaction([
       prisma.booking.update({ where: { id: booking.id }, data: { paymentDetails } }),
@@ -72,8 +74,9 @@ export async function POST(request: Request) {
     ]);
 
     return NextResponse.json({ paymentUrl, outTradeNo, signature });
-  } catch (error: any) {
-    console.error('Payment init error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Payment init error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }
