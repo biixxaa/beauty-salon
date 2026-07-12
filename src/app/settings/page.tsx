@@ -58,6 +58,8 @@ function SettingsPageContent() {
         const targetRole = data.user.role.toLowerCase();
         if (targetRole === 'super_admin') {
           router.push('/dashboard/admin');
+        } else if (targetRole === 'salon_owner') {
+          router.push('/dashboard/salon');
         } else {
           router.push(`/dashboard/${targetRole}`);
         }
@@ -94,6 +96,8 @@ function SettingsPageContent() {
         const targetRole = loginData.user.role.toLowerCase();
         if (targetRole === 'super_admin') {
           router.push('/dashboard/admin');
+        } else if (targetRole === 'salon_owner') {
+          router.push('/dashboard/salon');
         } else {
           router.push(`/dashboard/${targetRole}`);
         }

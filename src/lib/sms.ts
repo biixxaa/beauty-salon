@@ -6,9 +6,8 @@ export async function sendSms({ to, message }: { to: string; message: string }) 
   }
 
   try {
-    // @ts-ignore
-    const twilio = await import('twilio');
-    const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+    const { Twilio } = await import('twilio');
+    const client = new Twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
     const msg = await client.messages.create({ body: message, from: process.env.TWILIO_FROM, to });
     console.log('SMS sent:', msg.sid);
     return { ok: true, sid: msg.sid };

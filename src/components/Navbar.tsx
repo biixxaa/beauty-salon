@@ -128,7 +128,7 @@ export default function Navbar({ onOpenConsultant }: NavbarProps) {
 
               {/* Dashboard Link */}
               <Link
-                href={`/dashboard/${user.role.toLowerCase() === 'super_admin' ? 'admin' : user.role.toLowerCase()}`}
+                href={`/dashboard/${user.role.toLowerCase() === 'super_admin' ? 'admin' : user.role.toLowerCase() === 'salon_owner' ? 'salon' : user.role.toLowerCase()}`}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors text-sm font-bold"
               >
                 <LayoutDashboard className="h-4 w-4" />
@@ -217,7 +217,7 @@ export default function Navbar({ onOpenConsultant }: NavbarProps) {
               </div>
 
               <Link
-                href={`/dashboard/${user.role.toLowerCase() === 'super_admin' ? 'admin' : user.role.toLowerCase()}`}
+                href={`/dashboard/${user.role.toLowerCase() === 'super_admin' ? 'admin' : user.role.toLowerCase() === 'salon_owner' ? 'salon' : user.role.toLowerCase()}`}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 justify-center text-sm font-bold text-zinc-800 dark:text-zinc-200"
                 onClick={() => setMobileMenuOpen(false)}
               >
