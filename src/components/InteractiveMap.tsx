@@ -20,13 +20,13 @@ interface SalonPin {
 }
 
 interface InteractiveMapProps {
-  salons: any[];
-  onSelectSalon?: (salon: any) => void;
+  salons: SalonPin[];
+  onSelectSalon?: (salon: SalonPin) => void;
   centerCoordinates?: { latitude: number; longitude: number };
 }
 
 export default function InteractiveMap({ salons, onSelectSalon, centerCoordinates }: InteractiveMapProps) {
-  const [activeSalon, setActiveSalon] = useState<any>(null);
+  const [activeSalon, setActiveSalon] = useState<SalonPin | null>(null);
 
   // Map coordinate range roughly corresponding to Addis Ababa
   // Lat: 8.98 to 9.04, Lng: 38.74 to 38.80

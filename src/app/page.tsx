@@ -1,7 +1,7 @@
 // src/app/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type SVGProps } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin, Sparkles, Star, Scissors, Heart, Flame, ShieldCheck, Compass, ArrowRight, UserPlus, Gift } from 'lucide-react';
@@ -45,7 +45,7 @@ export default function Home() {
     { name: 'Unisex Centers', code: 'UNISEX', icon: Sparkles },
   ];
 
-  function SmileIcon(props: any) {
+  function SmileIcon(props: SVGProps<SVGSVGElement>) {
     return (
       <svg
         {...props}

@@ -41,8 +41,9 @@ export default function StaffManager({ salonId }: StaffManagerProps) {
         if (!res.ok) throw new Error('Failed to fetch staff');
         const data = await res.json();
         setStaff(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch staff');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(msg || 'Failed to fetch staff');
       } finally {
         setLoading(false);
       }
@@ -77,8 +78,9 @@ export default function StaffManager({ salonId }: StaffManagerProps) {
       const updatedRes = await fetch(`/api/dashboard/employees?salonId=${salonId}`);
       const updatedData = await updatedRes.json();
       setStaff(updatedData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to add staff');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg || 'Failed to add staff');
     }
   };
 

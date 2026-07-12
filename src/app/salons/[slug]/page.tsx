@@ -72,7 +72,7 @@ export default function SalonDetailPage() {
 
         // 2. Generate increments of 30 mins
         const slots: string[] = [];
-        let [openHour, openMin] = workHours.openTime.split(':').map(Number);
+        const [openHour, openMin] = workHours.openTime.split(':').map(Number);
         const [closeHour, closeMin] = workHours.closeTime.split(':').map(Number);
 
         const openMinutes = openHour * 60 + openMin;

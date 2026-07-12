@@ -13,9 +13,10 @@ export async function GET(request: Request) {
 
     const services = await prisma.service.findMany({ where, orderBy: { price: 'asc' } });
     return NextResponse.json(services);
-  } catch (error: any) {
-    console.error('Services GET error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Services GET error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -35,8 +36,9 @@ export async function POST(request: Request) {
     await prisma.auditLog.create({ data: { userId: null, action: 'SERVICE_CREATE', details: `Created service ${service.id} for salon ${salonId}` } });
 
     return NextResponse.json({ service }, { status: 201 });
-  } catch (error: any) {
-    console.error('Services POST error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Services POST error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

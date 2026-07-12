@@ -100,8 +100,9 @@ export async function POST(request: Request) {
       referralCode: result.profile.referralCode,
     }, { status: 201 });
 
-  } catch (error: any) {
-    console.error('Registration API Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Registration API Error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

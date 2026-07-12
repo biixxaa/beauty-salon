@@ -76,8 +76,9 @@ export async function GET(
     }
 
     return NextResponse.json(salon);
-  } catch (error: any) {
-    console.error('Fetch Salon Detail API Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Fetch Salon Detail API Error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

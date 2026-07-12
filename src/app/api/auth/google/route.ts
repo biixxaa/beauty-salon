@@ -77,8 +77,9 @@ export async function POST(request: Request) {
     await prisma.auditLog.create({ data: { userId: user.id, action: 'USER_LOGIN_GOOGLE', details: `User logged in with Google (${email})` } });
 
     return response;
-  } catch (error: any) {
-    console.error('Google OAuth error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Google OAuth error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

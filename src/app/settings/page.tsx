@@ -104,8 +104,9 @@ function SettingsPageContent() {
           router.push(`/dashboard/${targetRole}`);
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
     }

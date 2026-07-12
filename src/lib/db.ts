@@ -9,7 +9,7 @@ const pool = new pg.Pool({
 const adapter = new PrismaPg(pool);
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var prisma: PrismaClient | undefined;
 }
 

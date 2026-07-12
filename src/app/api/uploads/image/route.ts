@@ -58,8 +58,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ url: result.secure_url });
-  } catch (e: any) {
-    console.error('Upload API error:', e);
-    return NextResponse.json({ error: e.message || 'Internal Server Error' }, { status: 500 });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('Upload API error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

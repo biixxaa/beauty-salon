@@ -57,8 +57,9 @@ export default function EmployeeProfileForm() {
           resumeUrl: data.resumeUrl || '',
           avatarUrl: data.avatarUrl || '',
         });
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch profile');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(msg || 'Failed to fetch profile');
       } finally {
         setLoading(false);
       }
@@ -86,8 +87,9 @@ export default function EmployeeProfileForm() {
       setProfile(data);
       setSuccess('Profile updated successfully!');
       setEditing(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -131,8 +133,9 @@ export default function EmployeeProfileForm() {
         showConfirm: false,
       });
       setShowPasswordForm(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to change password');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg || 'Failed to change password');
     }
   };
 
