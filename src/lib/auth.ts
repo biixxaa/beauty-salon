@@ -21,8 +21,10 @@ export function signToken(payload: { id: string; email: string; name: string; ro
 
 export function verifyToken(token: string): { id: string; email: string; name: string; role: string } | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as any;
+    return jwt.verify(token, JWT_SECRET) as { id: string; email: string; name: string; role: string };
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('verifyToken error:', msg);
     return null;
   }
 }
