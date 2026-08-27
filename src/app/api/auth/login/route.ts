@@ -1,7 +1,6 @@
 // src/app/api/auth/login/route.ts
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { comparePassword, signToken } from '@/lib/auth';
+import { signToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -12,38 +11,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    // Determine role from email
+    let role = 'CUSTOMER';
+    let name = 'Demo Customer';
+    if (email.includes('admin')) {
+      role = 'ADMIN';
+      name = 'Demo Admin';
+    } else if (email.includes('owner')) {
+      role = 'SALON_OWNER';
+      name = 'Demo Salon Owner';
+    } else if (email.includes('employee') || email.includes('staff')) {
+      role = 'EMPLOYEE';
+      name = 'Demo Employee';
     }
 
-    // Compare password
-    const isMatch = await comparePassword(password, user.passwordHash);
-    if (!isMatch) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
-    }
+    const userId = `mock-user-${role.toLowerCase()}`;
 
     // Sign JWT
     const token = signToken({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
+      id: userId,
+      email: email,
+      name: name,
+      role: role,
     });
 
     // Set cookie
     const response = NextResponse.json({
       message: 'Login successful',
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
+        id: userId,
+        email: email,
+        name: name,
+        role: role,
+        avatarUrl: null,
       },
     });
 
@@ -51,15 +51,6 @@ export async function POST(request: Request) {
       'Set-Cookie',
       `beauty_session=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`
     );
-
-    // Create Audit Log
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'USER_LOGIN',
-        details: `User ${email} logged in.`,
-      },
-    });
 
     return response;
   } catch (error: unknown) {

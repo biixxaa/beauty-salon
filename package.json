@@ -12,16 +12,12 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
-    "@prisma/adapter-pg": "7.8.0",
-    "@prisma/client": "^7.8.0",
-    "@types/pg": "8.20.0",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^12.42.2",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
     "nodemailer": "^6.9.2",
-    "pg": "8.22.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.81.0",
@@ -38,13 +34,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
-    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5",
     "twilio": "^6.0.2"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  }
 }

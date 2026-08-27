@@ -54,16 +54,13 @@ export async function getUserFromRequest(request: Request) {
     const decoded = verifyToken(token);
     if (!decoded) return null;
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        avatarUrl: true,
-      },
-    });
+    const user = {
+      id: decoded.id,
+      email: decoded.email,
+      name: decoded.name,
+      role: decoded.role,
+      avatarUrl: null,
+    };
 
     return user;
   } catch (error) {
