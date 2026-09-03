@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
     // Find salon(s) owned by this user
     const ownedSalons = await prisma.salon.findMany({ where: { ownerId: user.id }, select: { id: true } });
-    const salonIds = ownedSalons.map((s) => s.id);
+    const salonIds = ownedSalons.map((s: { id: string }) => s.id);
 
     // Aggregate monthly revenue for the past 12 months
     const now = new Date();

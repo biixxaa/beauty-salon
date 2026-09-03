@@ -35,7 +35,7 @@ export async function PATCH(
       where: { ownerId: user.id },
       select: { id: true },
     });
-    const ownedSalonIds = ownedSalons.map((s) => s.id);
+    const ownedSalonIds = ownedSalons.map((s: { id: string }) => s.id);
     const isSalonOwner = ownedSalonIds.includes(booking.salonId);
 
     const employee = await prisma.employee.findUnique({
@@ -110,7 +110,7 @@ export async function PATCH(
         return NextResponse.json({ error: 'Clients can only request cancellation' }, { status: 403 });
       }
 
-      const updated = await prisma.$transaction(async (tx) => {
+      const updated = await prisma.$transaction(async (tx: any) => {
         // If cancellation is requested and it was prepaid, refund wallet!
         let finalPaymentStatus = booking.paymentStatus;
         if (targetStatus === BookingStatus.CANCELLED && booking.paymentStatus === PaymentStatus.PAID) {

@@ -17,6 +17,7 @@ interface SalonPin {
   longitude: number;
   xPercent: number; // For plotting on our SVG grid
   yPercent: number;
+  isVerified?: boolean;
 }
 
 interface InteractiveMapProps {

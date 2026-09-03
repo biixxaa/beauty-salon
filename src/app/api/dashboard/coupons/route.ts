@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   try {
     const user = await requireRole(request, ['SALON_OWNER', 'ADMIN', 'SUPER_ADMIN']);
     const ownedSalons = await prisma.salon.findMany({ where: { ownerId: user.id }, select: { id: true } });
-    const salonIds = ownedSalons.map((s) => s.id);
+    const salonIds = ownedSalons.map((s: { id: string }) => s.id);
 
     const coupons = await prisma.coupon.findMany({
       where: {

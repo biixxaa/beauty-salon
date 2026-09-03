@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const user = await requireRole(request, ['SALON_OWNER', 'ADMIN', 'SUPER_ADMIN']);
     // Find salons owned by this user
     const ownedSalons = await prisma.salon.findMany({ where: { ownerId: user.id }, select: { id: true } });
-    const salonIds = ownedSalons.map((s) => s.id);
+    const salonIds = ownedSalons.map((s: { id: string }) => s.id);
 
     const employees = await prisma.employee.findMany({ where: { salonId: { in: salonIds } }, include: { user: { select: { email: true, name: true, phone: true } } } });
     return NextResponse.json(employees);

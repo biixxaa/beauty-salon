@@ -32,7 +32,7 @@ export async function GET(request: Request) {
         where: { ownerId: user.id },
         select: { id: true },
       });
-      const salonIds = ownedSalons.map((s) => s.id);
+      const salonIds = ownedSalons.map((s: { id: string }) => s.id);
 
       bookings = await prisma.booking.findMany({
         where: { salonId: { in: salonIds } },
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
     const finalPrice = Math.max(0, Number(service.price) - discount);
 
     // 5. Booking Creation & Transaction Logic (use advisory lock per-employee to avoid race conditions)
-    const booking = await prisma.$transaction(async (tx) => {
+    const booking = await prisma.$transaction(async (tx: any) => {
       // Acquire a PostgreSQL advisory lock scoped to the employeeId for this transaction
       // This prevents concurrent transactions from creating overlapping bookings for the same employee
       try {

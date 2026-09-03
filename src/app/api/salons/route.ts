@@ -67,14 +67,14 @@ export async function GET(request: Request) {
       const radiusLimit = radiusStr ? parseFloat(radiusStr) : 10.0;
 
       if (!isNaN(clientLat) && !isNaN(clientLng)) {
-        const salonsWithDistance = salons
-          .map((salon) => {
+        const salonsWithDistance = (salons as Array<Record<string, any>>)
+          .map((salon: Record<string, any>) => {
             const distance = getDistance(clientLat, clientLng, salon.latitude, salon.longitude);
             return { ...salon, distance: parseFloat(distance.toFixed(2)) };
           })
-          .filter((salon) => isNaN(radiusLimit) || salon.distance <= radiusLimit);
+          .filter((salon: { distance: number }) => isNaN(radiusLimit) || salon.distance <= radiusLimit);
 
-        salonsWithDistance.sort((a, b) => a.distance - b.distance);
+        salonsWithDistance.sort((a: { distance: number }, b: { distance: number }) => a.distance - b.distance);
         return NextResponse.json(salonsWithDistance);
       }
     }
