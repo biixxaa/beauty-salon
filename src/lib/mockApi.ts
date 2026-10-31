@@ -83,6 +83,13 @@ export function switchDemoRole(roleKey: 'customer' | 'salon_owner' | 'employee' 
   const targetUser = DEMO_USERS[roleKey];
   if (targetUser) {
     setCurrentUser(targetUser);
+    if (typeof window !== 'undefined') {
+      window.fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: targetUser.email }),
+      }).catch(() => {});
+    }
   }
 }
 
@@ -103,6 +110,16 @@ export function installMockApi() {
     const apiIndex = rawUrl.indexOf('/api/');
     if (apiIndex === -1) {
       return originalFetch(input, init);
+    }
+
+    // Try real backend endpoint first
+    try {
+      const realResponse = await originalFetch(input, init);
+      if (realResponse.status !== 404) {
+        return realResponse;
+      }
+    } catch {
+      // Fall back to client mock if offline or static export
     }
 
     const apiPathWithQuery = rawUrl.substring(apiIndex);
