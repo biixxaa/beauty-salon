@@ -8,7 +8,9 @@
     "coverage": "vitest run --coverage",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "backend": "npm --prefix backend run dev",
+    "backend:build": "npm --prefix backend run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
